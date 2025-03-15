@@ -19,22 +19,22 @@ const questions = [
   {
     name: 'NEXT_PUBLIC_SUPABASE_URL',
     message: 'Enter your Supabase URL:',
-    default: 'https://dxnpmtzugaveqmojynnk.supabase.co'
+    default: ''
   },
   {
     name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     message: 'Enter your Supabase Anon Key:',
-    default: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4bnBtdHp1Z2F2ZXFtb2p5bm5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzNTI5NDAsImV4cCI6MjA1NTkyODk0MH0.IG_WqvJnDloTEwG9M6w46t_0wjV_kPBZy75PIm2vh5o'
+    default: ''
   },
   {
     name: 'NEXT_PUBLIC_OPENAI_API_KEY',
     message: 'Enter your OpenAI API Key:',
-    default: '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'
+    default: ''
   },
   {
     name: 'NEXT_PUBLIC_ROBOFLOW_API_KEY',
     message: 'Enter your Roboflow API Key:',
-    default: '305kTUjX7IoYABj7vMen'
+    default: ''
   }
 ];
 
