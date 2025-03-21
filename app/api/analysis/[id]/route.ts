@@ -3,31 +3,31 @@ import { getAnalysisById } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params, searchParams }: { params: { id: string }; searchParams: URLSearchParams }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
-    
+
     if (!id) {
       return NextResponse.json({ error: 'Missing analysis ID' }, { status: 400 });
     }
-    
+
     // Fetch the analysis from the database
     const { data: analysis, error } = await getAnalysisById(id);
-    
+
     if (error || !analysis) {
       return NextResponse.json(
         { error: error?.message || 'Analysis not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({
       analysis,
       status: analysis.analysis_status,
       result: analysis.analysis_result,
     });
-    
+
   } catch (error) {
     console.error('Error fetching analysis:', error);
     return NextResponse.json(
