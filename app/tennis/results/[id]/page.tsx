@@ -10,10 +10,13 @@ import { TennisAnalysisResult } from '@/lib/tennis-tracker';
 export default function TennisResultsPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const id = params.id as string;
+  const id = params?.id as string | undefined;
+  if (!id) {
+    throw new Error("Invalid or missing 'id' parameter.");
+  }
   
   // Get the video URL from the query parameters if available
-  const videoUrlFromQuery = searchParams.get('videoUrl');
+  const videoUrlFromQuery = searchParams?.get('videoUrl') || null;
   
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
   const [tennisAnalysis, setTennisAnalysis] = useState<TennisAnalysisResult | null>(null);
@@ -33,7 +36,7 @@ export default function TennisResultsPage() {
           
           // Create a VideoAnalysis object from the stored data
           const analysisObj: VideoAnalysis = {
-            id,
+            id: id!,
             user_id: 'client-user',
             video_url: videoUrlFromQuery || '',
             sport_type: 'tennis',

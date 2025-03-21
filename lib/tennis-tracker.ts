@@ -47,33 +47,45 @@ export interface TrackingFrame {
 }
 
 export interface TennisAnalysisResult {
-  frames: TrackingFrame[];
-  videoMetadata: {
-    duration: number;
-    width: number;
-    height: number;
-    fps: number;
-    pixelsToMeters: number;
-  };
   playerStats: {
     averageSpeed: number;
     maxSpeed: number;
     totalDistanceCovered: number;
+    positionHeatmap: number[][];
     shotsHit: number;
     forehandCount: number;
     backhandCount: number;
     serveCount: number;
     volleyCount: number;
-    positionHeatmap: number[][];
   };
   shotStats: {
     averageBallSpeed: number;
     maxBallSpeed: number;
-    shotTypes: {
-      [key: string]: number;
-    };
+    shotTypes: Record<string, number>;
   };
   courtCoverage: number;
+  videoMetadata: {
+    duration: number;
+    width: number;
+    height: number;
+  };
+  frames: FrameData[];
+}
+
+export interface FrameData {
+  timestamp: number;
+  playerSpeed?: number;
+  ballSpeed?: number;
+  isShot?: boolean;
+  shotType?: 'forehand' | 'backhand' | 'serve' | 'volley' | string;
+  playerPosition?: {
+    x: number;
+    y: number;
+  };
+  ballPosition?: {
+    x: number;
+    y: number;
+  };
 }
 
 // Constants for tennis analysis
@@ -721,11 +733,6 @@ export function generateAnalysisResult(
   const courtCoverage = calculateCourtCoverage(frames);
   
   return {
-    frames,
-    videoMetadata: {
-      ...videoMetadata,
-      pixelsToMeters
-    },
     playerStats: {
       averageSpeed: averagePlayerSpeed,
       maxSpeed: maxPlayerSpeed,
@@ -742,6 +749,31 @@ export function generateAnalysisResult(
       maxBallSpeed,
       shotTypes
     },
-    courtCoverage
+    courtCoverage,
+    videoMetadata: {
+      duration: videoMetadata.duration,
+      width: videoMetadata.width,
+      height: videoMetadata.height
+    },
+    frames: generateFramesData(frames) // Convert TrackingFrames to FrameData
   };
+}
+
+// Helper function to convert TrackingFrames to FrameData
+function generateFramesData(frames: TrackingFrame[]): FrameData[] {
+  return frames.map(frame => ({
+    timestamp: frame.timestamp,
+    playerSpeed: frame.playerSpeed,
+    ballSpeed: frame.ballSpeed,
+    isShot: frame.isShot,
+    shotType: frame.shotType,
+    playerPosition: frame.player ? {
+      x: frame.player.centerX,
+      y: frame.player.centerY
+    } : undefined,
+    ballPosition: frame.ball ? {
+      x: frame.ball.centerX,
+      y: frame.ball.centerY
+    } : undefined
+  }));
 } 

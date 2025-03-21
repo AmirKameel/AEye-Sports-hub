@@ -1,19 +1,56 @@
 import { createClient } from '@supabase/supabase-js';
+import { TennisAnalysisResult } from './tennis-tracker';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-export type VideoAnalysis = {
+// Define the VideoAnalysis type
+export interface VideoAnalysis {
   id: string;
   user_id: string;
   video_url: string;
-  sport_type: 'football' | 'tennis';
+  sport_type: 'tennis' | 'football';
   analysis_status: 'pending' | 'processing' | 'completed' | 'failed';
-  analysis_result: any;
+  analysis_result: TennisAnalysisResult | any;
   created_at: string;
-};
+}
+
+// Fetch analysis by ID
+export async function getAnalysisById(id: string) {
+  return supabase
+    .from('video_analysis')
+    .select('*')
+    .eq('id', id)
+    .single();
+}
+
+// Create a new analysis record
+export async function createAnalysis(data: Omit<VideoAnalysis, 'id' | 'created_at'>) {
+  return supabase
+    .from('video_analysis')
+    .insert(data)
+    .select()
+    .single();
+}
+
+// Update an existing analysis record
+export async function updateAnalysis(id: string, data: Partial<Omit<VideoAnalysis, 'id' | 'created_at'>>) {
+  return supabase
+    .from('video_analysis')
+    .update(data)
+    .eq('id', id);
+}
+
+// Fetch analysis by user ID
+export async function getAnalysesByUserId(userId: string) {
+  return supabase
+    .from('video_analysis')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+}
 
 export type Coordinates = {
   frame_id: number;
@@ -26,48 +63,4 @@ export type Coordinates = {
     width: number;
     height: number;
   }[];
-};
-
-export async function createAnalysis(userId: string, videoUrl: string, sportType: 'football' | 'tennis') {
-  return await supabase
-    .from('video_analysis')
-    .insert({
-      user_id: userId,
-      video_url: videoUrl,
-      sport_type: sportType,
-      analysis_status: 'pending',
-      analysis_result: null,
-    })
-    .select()
-    .single();
-}
-
-export async function updateAnalysisStatus(id: string, status: 'pending' | 'processing' | 'completed' | 'failed', result?: any) {
-  const updateData: any = { analysis_status: status };
-  if (result) {
-    updateData.analysis_result = result;
-  }
-  
-  return await supabase
-    .from('video_analysis')
-    .update(updateData)
-    .eq('id', id)
-    .select()
-    .single();
-}
-
-export async function getAnalysisByUserId(userId: string) {
-  return await supabase
-    .from('video_analysis')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-}
-
-export async function getAnalysisById(id: string) {
-  return await supabase
-    .from('video_analysis')
-    .select('*')
-    .eq('id', id)
-    .single();
-} 
+}; 

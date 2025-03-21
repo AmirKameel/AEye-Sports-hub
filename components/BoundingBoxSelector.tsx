@@ -36,6 +36,8 @@ export default function BoundingBoxSelector({
 
   // Initialize video and canvas
   useEffect(() => {
+    if (!videoUrl) return;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -53,7 +55,7 @@ export default function BoundingBoxSelector({
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
-  }, []);
+  }, [videoUrl]);
 
   // Handle window resize
   useEffect(() => {
