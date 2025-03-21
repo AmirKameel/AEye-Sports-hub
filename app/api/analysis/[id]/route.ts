@@ -3,7 +3,7 @@ import { getAnalysisById } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params, searchParams }: { params: { id: string }; searchParams: URLSearchParams }
 ) {
   try {
     const { id } = params;
@@ -39,4 +39,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
