@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalysisById } from '@/lib/supabase';
 
-// Remove the params parameter completely and extract ID from the URL
-export async function GET(
-  request: NextRequest
-) {
+// For Next.js 15+, we use a simpler approach without the second parameter
+export async function GET(request: NextRequest) {
   try {
     // Extract the ID from the URL path
     const pathname = request.nextUrl.pathname;
