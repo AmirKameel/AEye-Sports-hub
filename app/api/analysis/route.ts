@@ -23,14 +23,18 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create a new analysis record
-    const { data, error } = await createAnalysis({
-      user_id: userId,
-      video_url: videoUrl,
-      sport_type: 'tennis',
-      analysis_status: 'completed',
-      analysis_result: analysisResult,
-    });
+    // Create a new analysis record - fixed to match function signature
+    const { data, error } = await createAnalysis(
+      {
+        user_id: userId,
+        video_url: videoUrl,
+        sport_type: 'tennis',
+        analysis_status: 'completed',
+        analysis_result: analysisResult,
+      },
+      videoUrl,  // Pass videoUrl as second parameter to match function signature
+      'tennis'   // Pass sportType as third parameter to match function signature
+    );
     
     if (error) {
       console.error('Error creating analysis:', error);
@@ -99,8 +103,13 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    // Update the analysis
-    const { error } = await updateAnalysis(id, updateFields);
+    // Update the analysis - fixed to match function signature
+    const { error } = await updateAnalysis(
+      id,                              // First parameter: id
+      "dummyParameter",                // Second parameter (p0) as required by function
+      { error: null },                 // Third parameter (p1) as required by function
+      updateFields                     // Fourth parameter: actual update data
+    );
     
     if (error) {
       console.error('Error updating analysis:', error);
@@ -136,4 +145,4 @@ function validateAnalysisResult(result: any): result is TennisAnalysisResult {
     Array.isArray(result.frames) &&
     typeof result.courtCoverage === 'number'
   );
-} 
+}
