@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalysisById } from '@/lib/supabase';
 
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
-export async function GET(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(request: NextRequest) {
   try {
-    const id = context.params.id;
+    const id = request.nextUrl.pathname.split('/').pop();
     
     if (!id) {
       return NextResponse.json(
@@ -21,7 +12,6 @@ export async function GET(
       );
     }
     
-    // Fetch the analysis from the database
     const { data: analysis, error } = await getAnalysisById(id);
     
     if (error || !analysis) {
@@ -36,7 +26,6 @@ export async function GET(
       status: analysis.analysis_status,
       result: analysis.analysis_result,
     });
-    
   } catch (error) {
     console.error('Error fetching analysis:', error);
     return NextResponse.json(
