@@ -1,23 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalysisById } from '@/lib/supabase';
 
+// Remove the params parameter completely and extract ID from the URL
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
-  const id = params.id;
   try {
+    // Extract the ID from the URL path
+    const pathname = request.nextUrl.pathname;
+    const id = pathname.split('/').pop();
+    
     if (!id) {
       return NextResponse.json({ error: 'Missing analysis ID' }, { status: 400 });
     }
+    
     // Fetch the analysis from the database
     const { data: analysis, error } = await getAnalysisById(id);
+    
     if (error || !analysis) {
       return NextResponse.json(
         { error: error?.message || 'Analysis not found' },
         { status: 404 }
       );
     }
+    
     return NextResponse.json({
       analysis,
       status: analysis.analysis_status,
