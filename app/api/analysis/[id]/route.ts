@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalysisById } from '@/lib/supabase';
 
+type Params = {
+  params: {
+    id: string;
+  };
+};
+
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: Params
 ) {
   try {
-    const { id } = context.params;
+    const id = params.id;
     if (!id) {
       return NextResponse.json({ error: 'Missing analysis ID' }, { status: 400 });
     }
