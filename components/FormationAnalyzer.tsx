@@ -325,7 +325,7 @@ export default function FormationAnalyzer() {
                   className="w-full p-2 border rounded"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  After placing players by clicking on the field, enter a name and click "Save Scenario".
+                  After placing players by clicking on the field, enter a name and click &quot;Save Scenario&quot;.
                 </p>
               </div>
             )}
