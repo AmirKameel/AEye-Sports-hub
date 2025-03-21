@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAnalysisById } from '@/lib/supabase';
 
-type Props = {
-  params: {
-    id: string
-  }
-}
-
 export async function GET(
-  request: NextRequest,
-  context: Props
+  _request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = params;
     
     if (!id) {
       return NextResponse.json(
