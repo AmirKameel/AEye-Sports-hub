@@ -3,7 +3,7 @@ import { getAnalysisById } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Record<string, string> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
@@ -25,8 +25,6 @@ export async function GET(
       );
     }
     
-    // You can access searchParams via: request.nextUrl.searchParams if needed.
-    // Return the analysis data
     return NextResponse.json({
       analysis,
       status: analysis.analysis_status,
