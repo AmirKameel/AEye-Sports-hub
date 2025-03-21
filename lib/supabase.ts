@@ -27,7 +27,7 @@ export async function getAnalysisById(id: string) {
 }
 
 // Create a new analysis record
-export async function createAnalysis(data: Omit<VideoAnalysis, 'id' | 'created_at'>) {
+export async function createAnalysis(data: Omit<VideoAnalysis, 'id' | 'created_at'>, videoUrl: any, sportType: any) {
   return supabase
     .from('video_analysis')
     .insert(data)
@@ -36,7 +36,7 @@ export async function createAnalysis(data: Omit<VideoAnalysis, 'id' | 'created_a
 }
 
 // Update an existing analysis record
-export async function updateAnalysis(id: string, data: Partial<Omit<VideoAnalysis, 'id' | 'created_at'>>) {
+export async function updateAnalysis(id: string, p0: string, p1: { error: any; }, data: Partial<Omit<VideoAnalysis, 'id' | 'created_at'>>) {
   return supabase
     .from('video_analysis')
     .update(data)
@@ -52,6 +52,20 @@ export async function getAnalysesByUserId(userId: string) {
     .order('created_at', { ascending: false });
 }
 
+export async function updateAnalysisStatus(
+  analysisId: string,
+  status: string,
+  details?: Record<string, any>
+) {
+  return supabase
+    .from('video_analysis')
+    .update({
+      analysis_status: status,
+      analysis_result: details || null
+    })
+    .eq('id', analysisId);
+}
+
 export type Coordinates = {
   frame_id: number;
   timestamp: number;
@@ -63,4 +77,4 @@ export type Coordinates = {
     width: number;
     height: number;
   }[];
-}; 
+};
