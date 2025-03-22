@@ -488,21 +488,32 @@ export default function PlayerProfileMaker() {
   const handleExport = async () => {
     try {
       setIsLoading(true);
+      // Clean up profile data before sending
+      const cleanProfile = {
+        ...profile,
+        // Remove potentially problematic data like large base64 images
+        profileImage: profile.profileImage ? 'image data present' : undefined
+      };
+
       const response = await fetch('/api/export-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ profile }),
+        body: JSON.stringify({ profile: cleanProfile }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.details || 'Failed to export profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to export profile');
       }
 
       // Handle successful PDF response
       const blob = await response.blob();
+      if (blob.size === 0) {
+        throw new Error('Generated PDF is empty');
+      }
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
