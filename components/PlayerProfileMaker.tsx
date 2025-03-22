@@ -488,11 +488,32 @@ export default function PlayerProfileMaker() {
   const handleExport = async () => {
     try {
       setIsLoading(true);
-      await exportProfile();
-      // Handle success
+      const response = await fetch('/api/export-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ profile }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || 'Failed to export profile');
+      }
+
+      // Handle successful PDF response
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${profile.fullName.toLowerCase().replace(/\s+/g, '-')}-profile.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      // Show error message to user
-      alert('Failed to export profile. Please try again.');
+      console.error('Error exporting profile:', error);
+      alert(error instanceof Error ? error.message : 'Failed to export profile');
     } finally {
       setIsLoading(false);
     }
