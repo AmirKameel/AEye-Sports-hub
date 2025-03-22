@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium-min';
+import puppeteer from 'puppeteer-core';
 
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    const { profile, format } = data;
+    const { profile } = data;
 
-    if (!profile || !format) {
+    if (!profile) {
       return NextResponse.json(
-        { error: 'Profile data and format are required' },
+        { error: 'Profile data is required' },
         { status: 400 }
       );
     }
@@ -83,15 +84,17 @@ export async function POST(request: NextRequest) {
         <body>
           <div class="profile-container">
             <div class="header">
-              <h1>${profile.name}</h1>
-              <p>${profile.position}${profile.team ? ` - ${profile.team}` : ''}</p>
+              <h1>${profile.fullName}</h1>
+              <p>${profile.position}</p>
             </div>
 
-            ${profile.imageUrl ? `<img src="${profile.imageUrl}" alt="Profile" class="profile-image" />` : ''}
+            ${profile.profileImage ? 
+              `<img src="${profile.profileImage}" alt="Profile" class="profile-image" />` : 
+              ''}
 
             <div class="info-grid">
               <div class="info-item">
-                <strong>Age:</strong> ${profile.age || 'N/A'}
+                <strong>Date of Birth:</strong> ${profile.dateOfBirth || 'N/A'}
               </div>
               <div class="info-item">
                 <strong>Height:</strong> ${profile.height ? `${profile.height} cm` : 'N/A'}
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
                 <strong>Nationality:</strong> ${profile.nationality || 'N/A'}
               </div>
               <div class="info-item">
-                <strong>Jersey Number:</strong> ${profile.jerseyNumber || 'N/A'}
+                <strong>Preferred Foot:</strong> ${profile.preferredFoot || 'N/A'}
               </div>
             </div>
 
@@ -113,20 +116,20 @@ export async function POST(request: NextRequest) {
             </div>
 
             <div class="section">
-              <h2 class="section-title">Strengths</h2>
+              <h2 class="section-title">Key Strengths</h2>
               <ul class="list">
-                ${profile.strengths.map((strength: string) => `
-                  <li class="list-item">${strength}</li>
-                `).join('')}
+                ${profile.strengths?.map((strength: string) => 
+                  `<li class="list-item">${strength}</li>`
+                ).join('') || 'No strengths listed.'}
               </ul>
             </div>
 
             <div class="section">
-              <h2 class="section-title">Areas for Improvement</h2>
+              <h2 class="section-title">Previous Clubs</h2>
               <ul class="list">
-                ${profile.weaknesses.map((weakness: string) => `
-                  <li class="list-item">${weakness}</li>
-                `).join('')}
+                ${profile.clubs?.map((club: { name: string }) => 
+                  `<li class="list-item">${club.name}</li>`
+                ).join('') || 'No previous clubs listed.'}
               </ul>
             </div>
           </div>
@@ -134,44 +137,38 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    // Launch Puppeteer
+    // Configure Puppeteer for Vercel
     const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
       headless: true,
+      ignoreHTTPSErrors: true,
     });
+
     const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // Set content and wait for images to load
-    await page.setContent(html);
-    await page.waitForSelector('img');
-
-    let buffer;
-    if (format === 'png') {
-      // Generate PNG
-      buffer = await page.screenshot({
-        type: 'png',
-        fullPage: true,
-      });
-    } else {
-      // Generate PDF
-      buffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-      });
-    }
+    // Generate PDF
+    const buffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' }
+    });
 
     await browser.close();
 
-    // Return the file with appropriate headers
+    // Return PDF file
     return new NextResponse(buffer, {
       headers: {
-        'Content-Type': format === 'png' ? 'image/png' : 'application/pdf',
-        'Content-Disposition': `attachment; filename="${profile.name.toLowerCase().replace(/\s+/g, '-')}-profile.${format}"`,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${profile.fullName.toLowerCase().replace(/\s+/g, '-')}-profile.pdf"`,
       },
     });
   } catch (error) {
     console.error('Export error:', error);
     return NextResponse.json(
-      { error: 'Failed to export profile' },
+      { error: 'Failed to export profile', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
