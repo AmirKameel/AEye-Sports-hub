@@ -315,7 +315,7 @@ export default function TennisAnalysisPage() {
               <div className="bg-orange-100 text-orange-800 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
               <div>
                 <h3 className="font-medium">AI Tracking</h3>
-                <p className="text-gray-600">Our AI models track the player and ball throughout the video using the Roboflow API.</p>
+                <p className="text-gray-600">Our AI models track the player and ball throughout the video.</p>
               </div>
             </div>
             <div className="flex items-start">
