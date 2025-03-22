@@ -7,7 +7,6 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-}
   experimental: {
     serverActions: true,
   },
@@ -16,7 +15,7 @@ const nextConfig = {
       config.externals = [...config.externals, 'puppeteer-core'];
     }
     return config;
-  },
-}
+  }
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
