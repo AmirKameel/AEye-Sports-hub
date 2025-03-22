@@ -8,5 +8,15 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 }
+  experimental: {
+    serverActions: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...config.externals, 'puppeteer-core'];
+    }
+    return config;
+  },
+}
 
 module.exports = nextConfig
