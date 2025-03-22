@@ -119,6 +119,7 @@ export default function PlayerProfileMaker() {
   const [fileUploadError, setFileUploadError] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const [entryMethod, setEntryMethod] = useState<'manual' | 'upload' | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -452,6 +453,48 @@ export default function PlayerProfileMaker() {
       // Don't show alert here since this is automatic
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const retryWithBackoff = async (fn: () => Promise<any>, maxAttempts = 3) => {
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (i === maxAttempts - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+      }
+    }
+  };
+
+  const exportProfile = async () => {
+    return retryWithBackoff(async () => {
+      const response = await fetch('/api/export-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ profile }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      return response.json();
+    });
+  };
+  
+  const handleExport = async () => {
+    try {
+      setIsLoading(true);
+      await exportProfile();
+      // Handle success
+    } catch (error) {
+      // Show error message to user
+      alert('Failed to export profile. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -992,6 +1035,15 @@ export default function PlayerProfileMaker() {
                 >
                   Download as PDF
                 </button>
+                <button
+                  onClick={handleExport}
+                  disabled={isLoading}
+                  className={`px-4 py-2 bg-blue-600 text-white rounded ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}
+                >
+                  {isLoading ? 'Exporting...' : 'Export Profile'}
+                </button>
               </div>
             </div>
           </div>
@@ -999,4 +1051,4 @@ export default function PlayerProfileMaker() {
       )}
     </div>
   );
-} 
+}
