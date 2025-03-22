@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { profile, format } = await request.json();
+    const data = await request.json();
+    const { profile, format } = data;
 
     if (!profile || !format) {
       return NextResponse.json(
@@ -168,10 +169,10 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Error exporting profile:', error);
+    console.error('Export error:', error);
     return NextResponse.json(
       { error: 'Failed to export profile' },
       { status: 500 }
     );
   }
-} 
+}
